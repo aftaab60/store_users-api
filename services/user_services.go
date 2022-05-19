@@ -3,6 +3,8 @@ package services
 import (
 	"fmt"
 	"github.com/aftaab60/store_users-api/domain/users"
+	"github.com/aftaab60/store_users-api/utils/crypto_utils"
+	"github.com/aftaab60/store_users-api/utils/date_utils"
 	"github.com/aftaab60/store_users-api/utils/errors"
 )
 
@@ -10,6 +12,9 @@ func CreateUser(user users.User) (*users.User, *errors.RestErr) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
+	user.DateCreated = date_utils.NowTimeString()
+	user.Password = crypto_utils.GetHash(user.Password)
+
 	if saveErr := user.Save(); saveErr != nil {
 		return nil, saveErr
 	}

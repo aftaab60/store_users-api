@@ -2,14 +2,13 @@ package users
 
 import (
 	"github.com/aftaab60/store_users-api/datasources/mysql"
-	"github.com/aftaab60/store_users-api/utils/date_utils"
 	"github.com/aftaab60/store_users-api/utils/errors"
 	"github.com/aftaab60/store_users-api/utils/mysql_utils"
 )
 
 const (
 	queryGetUser    = "SELECT id, first_name, last_name, email, date_created from user where id=?;"
-	queryInsertUser = "INSERT into user(first_name, last_name, email, date_created) values(?,?,?,?);"
+	queryInsertUser = "INSERT into user(first_name, last_name, email, date_created, password) values(?,?,?,?,?);"
 	queryUpdateUser = "UPDATE user SET first_name=?, last_name=?, email=? where id=?;"
 )
 
@@ -34,8 +33,7 @@ func (user *User) Save() *errors.RestErr {
 	if err != nil {
 		return errors.NewInternalServerError(err.Error())
 	}
-	user.DateCreated = date_utils.NowTimeString()
-	result, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
+	result, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated, user.Password)
 	if saveErr != nil {
 		return mysql_utils.ParseError(saveErr)
 	}
