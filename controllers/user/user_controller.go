@@ -16,7 +16,7 @@ func CreateUser(c *gin.Context) {
 		c.JSON(restErr.Status, restErr)
 		return
 	}
-	result, saveErr := services.CreateUser(user)
+	result, saveErr := services.UserService.CreateUser(user)
 	if saveErr != nil {
 		c.JSON(saveErr.Status, saveErr)
 		return
@@ -30,7 +30,7 @@ func GetUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("Invalid user id in request"))
 		return
 	}
-	user, getErr := services.GetUser(userId)
+	user, getErr := services.UserService.GetUser(userId)
 	if getErr != nil {
 		c.JSON(getErr.Status, getErr)
 		return
@@ -53,7 +53,7 @@ func UpdateUser(c *gin.Context) {
 	user.Id = userId
 
 	isPartial := c.Request.Method == http.MethodPatch
-	result, updateErr := services.UpdateUser(isPartial, user)
+	result, updateErr := services.UserService.UpdateUser(isPartial, user)
 	if updateErr != nil {
 		c.JSON(updateErr.Status, updateErr)
 		return
