@@ -15,11 +15,15 @@ type PrivateUser struct {
 	DateCreated string `json:"dateCreated"`
 }
 
-func (user *User) Marshall() *PrivateUser {
+func (user *User) Marshall(isPublic bool) interface{} {
+	if isPublic {
+		return &PublicUser{
+			Id:          user.Id,
+			DateCreated: user.DateCreated,
+		}
+	}
 	var privateUser PrivateUser
 	userJson, _ := json.Marshal(user)
-	if err := json.Unmarshal(userJson, &privateUser); err != nil {
-		return nil
-	}
+	json.Unmarshal(userJson, &privateUser)
 	return &privateUser
 }

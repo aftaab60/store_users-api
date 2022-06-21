@@ -1,6 +1,7 @@
 package user
 
 import (
+	"github.com/aftaab60/store_oauth_go/oauth"
 	"github.com/aftaab60/store_users-api/domain/users"
 	"github.com/aftaab60/store_users-api/services"
 	"github.com/aftaab60/store_users-api/utils/errors"
@@ -21,10 +22,14 @@ func CreateUser(c *gin.Context) {
 		c.JSON(saveErr.Status, saveErr)
 		return
 	}
-	c.JSON(http.StatusCreated, result.Marshall())
+	c.JSON(http.StatusCreated, result.Marshall(oauth.IsPublic(c.Request)))
 }
 
 func GetUser(c *gin.Context) {
+	if err := oauth.AuthenticateRequest(c.Request); err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
 	userId, err := strconv.ParseInt(c.Param("user_id"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("Invalid user id in request"))
@@ -35,7 +40,11 @@ func GetUser(c *gin.Context) {
 		c.JSON(getErr.Status, getErr)
 		return
 	}
-	c.JSON(http.StatusOK, user.Marshall())
+	if oauth.GetCallerId(c.Request) == userId {
+		c.JSON(http.StatusOK, user.Marshall(false))
+		return
+	}
+	c.JSON(http.StatusOK, user.Marshall(oauth.IsPublic(c.Request)))
 }
 
 func UpdateUser(c *gin.Context) {
@@ -58,5 +67,15 @@ func UpdateUser(c *gin.Context) {
 		c.JSON(updateErr.Status, updateErr)
 		return
 	}
-	c.JSON(http.StatusOK, result.Marshall())
+	c.JSON(http.StatusOK, result.Marshall(oauth.IsPublic(c.Request)))
+}
+
+func Login(c *gin.Context) {
+	user := users.User{
+		Id:        100,
+		FirstName: "fname",
+		LastName:  "lname",
+		Email:     "mail@gmail.com",
+	}
+	c.JSON(http.StatusOK, user)
 }
